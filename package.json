@@ -1,0 +1,12 @@
+{
+  "name": "svario-webhook",
+  "version": "1.0.0",
+  "description": "Facebook Messenger webhook for Svario.is",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
