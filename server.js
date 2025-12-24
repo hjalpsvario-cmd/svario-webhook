@@ -116,4 +116,31 @@ app.get("/", (req, res) => res.send("Svario Webhook is running ✅"));
 
 // Render automatically assigns a port, so we listen on that
 const port = process.env.PORT || 4000;
+const crypto = require("crypto");
+
+// Shopify install route (start OAuth)
+app.get("/auth/shopify/install", (req, res) => {
+  const { shop } = req.query;
+
+  if (!shop) {
+    return res.status(400).send("Missing ?shop=your-store.myshopify.com");
+  }
+
+  const APP_URL = process.env.APP_URL; // e.g. https://svario-webhook-1.onrender.com
+  const SHOPIFY_API_KEY = process.env.SHOPIFY_API_KEY;
+
+  const redirectUri = `${APP_URL}/auth/shopify/callback`;
+  const scopes = "read_products"; // keep simple for now
+  const state = crypto.randomBytes(16).toString("hex");
+
+  const installUrl =
+    `https://${shop}/admin/oauth/authorize` +
+    `?client_id=${SHOPIFY_API_KEY}` +
+    `&scope=${encodeURIComponent(scopes)}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&state=${state}`;
+
+  return res.redirect(installUrl);
+});
+
 app.listen(port, () => console.log(`🚀 Webhook running on port ${port}`));
