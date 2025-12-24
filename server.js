@@ -127,4 +127,32 @@ app.get("/", (req, res) => res.send("Svario Webhook is running ✅"));
 
 // Start server
 const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`🚀 Webhook running on port ${port}`));
+app.listen(port, () => console.log(`🚀 Webhook running on port ${port}`));// ✅ TEST ROUTE — verify Shopify access token works
+app.get("/shopify/test-products", async (req, res) => {
+  const shop = (req.query.shop || "").toString().trim();
+  const accessToken = req.query.token;
+
+  if (!shop || !accessToken) {
+    return res
+      .status(400)
+      .send("Use ?shop=your-store.myshopify.com&token=ACCESS_TOKEN");
+  }
+
+  try {
+    const r = await fetch(
+      `https://${shop}/admin/api/2024-10/products.json?limit=5`,
+      {
+        headers: {
+          "X-Shopify-Access-Token": accessToken,
+        },
+      }
+    );
+
+    const data = await r.json();
+    return res.status(r.status).json(data);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Failed to fetch products");
+  }
+});
+
