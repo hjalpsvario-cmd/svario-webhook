@@ -27,6 +27,28 @@ app.post("/facebook/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+app.get("/auth/shopify", (req, res) => {
+  const shop = (req.query.shop || "").toString().trim();
+
+  if (!shop) return res.status(400).send("Missing ?shop=your-store.myshopify.com");
+  if (!shop.endsWith(".myshopify.com")) return res.status(400).send("Invalid shop domain");
+
+  const clientId = process.env.SHOPIFY_API_KEY;
+  const redirectUri = "https://svario-webhook-1.onrender.com/auth/shopify/callback";
+
+  // minimal scope for now (we can add later)
+  const scope = "read_products";
+  const state = "svario123"; // temporary; later we’ll generate/store per user
+
+  const installUrl =
+    `https://${shop}/admin/oauth/authorize` +
+    `?client_id=${encodeURIComponent(clientId)}` +
+    `&scope=${encodeURIComponent(scope)}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&state=${encodeURIComponent(state)}`;
+
+  return res.redirect(installUrl);
+});
 // Shopify OAuth callback
 app.get("/auth/shopify/callback", (req, res) => {
   res.status(200).send("Shopify callback received ✅");
