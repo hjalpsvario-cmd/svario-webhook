@@ -52,7 +52,7 @@ app.get("/auth/shopify/callback", async (req, res) => {
   return res.redirect(installUrl);
 });
 // Shopify OAuth callback
-app.get("/auth/shopify/callback", (req, res) => {
+app.get("/auth/shopify/callback", async (req, res) => {
   const { shop, code, hmac } = req.query;
 
   if (!shop || !code || !hmac) {
