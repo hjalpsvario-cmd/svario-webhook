@@ -27,6 +27,10 @@ app.post("/facebook/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+// Shopify OAuth callback
+app.get("/auth/shopify/callback", (req, res) => {
+  res.status(200).send("Shopify callback received ✅");
+});
 // Default route for quick check
 app.get("/", (req, res) => res.send("Svario Webhook is running ✅"));
 
