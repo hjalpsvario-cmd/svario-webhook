@@ -119,8 +119,9 @@ app.get("/auth/shopify/callback", async (req, res) => {
   const accessToken = tokenData.access_token;
 
   console.log(`✅ Token received for ${shop}: ${accessToken.slice(0, 8)}...`);
-  return res.status(200).send(`✅ Token received for ${shop}: ${accessToken.slice(0, 8)}...`);
-});
+  return res.status(200).send(
+  `✅ Token received for ${shop}: ${accessToken}`
+);
 
 // Health check
 app.get("/", (req, res) => res.send("Svario Webhook is running ✅"));
