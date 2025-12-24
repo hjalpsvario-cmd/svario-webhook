@@ -4,6 +4,10 @@
   "description": "Facebook Messenger webhook for Svario.is",
   "main": "server.js",
   "dependencies": {
+  "express": "^4.18.2",
+  "node-fetch": "^2.6.7"
+}
+
     "express": "^4.18.2"
   },
   "scripts": {
