@@ -1,7 +1,6 @@
 // Simple Facebook Messenger webhook for Svario.is
 const express = require("express");
 const app = express();
-
 const crypto = require("crypto");
 app.use(express.json());
 
