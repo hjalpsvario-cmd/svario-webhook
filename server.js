@@ -29,7 +29,7 @@ app.post("/facebook/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
-app.get("/auth/shopify", (req, res) => {
+app.get("/auth/shopify/callback", async (req, res) => {
   const shop = (req.query.shop || "").toString().trim();
 
   if (!shop) return res.status(400).send("Missing ?shop=your-store.myshopify.com");
@@ -86,7 +86,29 @@ app.get("/auth/shopify/callback", (req, res) => {
   }
 
   // If you see this, your callback is secure and correct.
-  return res.status(200).send(`✅ HMAC OK for ${shop}. Next: exchange code for token.`);
+    // Exchange code -> access token
+  const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: process.env.SHOPIFY_API_KEY,
+      client_secret: process.env.SHOPIFY_API_SECRET,
+      code,
+    }),
+  });
+
+  const tokenData = await tokenRes.json();
+
+  if (!tokenRes.ok) {
+    console.log("Token exchange failed:", tokenData);
+    return res.status(500).send("Token exchange failed");
+  }
+
+  const accessToken = tokenData.access_token;
+
+  return res
+    .status(200)
+    .send(`✅ Token received for ${shop}: ${accessToken.slice(0, 8)}...`);
 });
 
 // Default route for quick check
