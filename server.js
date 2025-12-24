@@ -53,8 +53,42 @@ app.get("/auth/shopify", (req, res) => {
 });
 // Shopify OAuth callback
 app.get("/auth/shopify/callback", (req, res) => {
-  res.status(200).send("Shopify callback received ✅");
+  const { shop, code, hmac } = req.query;
+
+  if (!shop || !code || !hmac) {
+    return res.status(400).send("Missing shop/code/hmac");
+  }
+
+  // Build message from query params (exclude hmac + signature)
+  const query = { ...req.query };
+  delete query.hmac;
+  delete query.signature;
+
+  const message = Object.keys(query)
+    .sort()
+    .map((key) => `${key}=${Array.isArray(query[key]) ? query[key].join(",") : query[key]}`)
+    .join("&");
+
+  const generated = crypto
+    .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
+    .update(message)
+    .digest("hex");
+
+  const safeCompare = (a, b) => {
+    const aBuf = Buffer.from(a, "utf8");
+    const bBuf = Buffer.from(b, "utf8");
+    if (aBuf.length !== bBuf.length) return false;
+    return crypto.timingSafeEqual(aBuf, bBuf);
+  };
+
+  if (!safeCompare(generated, hmac)) {
+    return res.status(401).send("HMAC validation failed");
+  }
+
+  // If you see this, your callback is secure and correct.
+  return res.status(200).send(`✅ HMAC OK for ${shop}. Next: exchange code for token.`);
 });
+
 // Default route for quick check
 app.get("/", (req, res) => res.send("Svario Webhook is running ✅"));
 
